@@ -85,8 +85,16 @@ var total = 0;
 
 // Exercise 2
 function cleanCart() {
-    cartList.length = 0;
-    return cartList;
+    cart.length = 0;
+
+    //Update number of products
+    numberProducts();
+    
+    //Close cart modal
+    var cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
+    cartModal.hide();
+
+    return cart;
 }
 
 // Exercise 3
@@ -96,7 +104,7 @@ function calculateTotal() {
     for (let i = 0; i < cart.length; i++) { 
         total += cart[i].price * cart[i].quantity;
     }
-    return total;
+    return total.toFixed(2);
 }
 
 // Exercise 4
@@ -128,13 +136,24 @@ function applyPromotionsCart() {
         if (cart[i].id == 1 && cart[i].quantity >= 3) {
             cart[i].price = 10;
             cart[i].subtotalWithDiscount = cart[i].price * cart[i].quantity;
+        }
+        if (cart[i].id == 1 && cart[i].quantity < 3) {
+            cart[i].price = 10.5;
+            cart[i].subtotal = cart[i].price * cart[i].quantity;
+            delete cart[i].subtotalWithDiscount;
         } 
 
         // Promotion Instant cupcake mixture
         if (cart[i].id == 3 && cart[i].quantity >= 10) {
-            cart[i].price = cart[i].price * (1/3);
+            cart[i].price = 5 * (2/3);
             cart[i].subtotalWithDiscount = cart[i].price * cart[i].quantity;
         } 
+        if (cart[i].id == 3 && cart[i].quantity < 10) {
+            cart[i].price = 5;
+            cart[i].subtotal = cart[i].price * cart[i].quantity;
+            delete cart[i].subtotalWithDiscount;
+        } 
+
     }
     return cart;
 }
@@ -154,7 +173,7 @@ function printCart() {
         } else {
             priceTotal = cart[i].subtotal;
         }
-        productsHTML += '<tr><th scope="row">'+cart[i].name+'</th><td>$'+cart[i].price+'</td><td>'+cart[i].quantity+'</td><td>$'+priceTotal+'</td></tr>';
+        productsHTML += '<tr><th scope="row">'+cart[i].name+'</th><td>$'+cart[i].price.toFixed(2)+'</td><td>'+cart[i].quantity+'</td><td>$'+priceTotal.toFixed(2)+'</td><td><a ref="javascript:void(0)" onclick="removeFromCart('+cart[i].id+')"><i class="fas fa-trash"></i></a></td></tr>';
     }
     document.getElementById('cart_list').innerHTML = productsHTML;
 
@@ -188,6 +207,9 @@ function addToCart(id) {
         product.subtotal = product.price * product.quantity;
         cart.push(product);
     }
+
+    // Extra, update total cart
+    numberProducts();
             
     return cart;
 }
@@ -204,10 +226,23 @@ function removeFromCart(id) {
         selectedProduct.subtotal = selectedProduct.price * selectedProduct.quantity;
     }
     applyPromotionsCart();
+    
+    // Extra, update cart
+    numberProducts();
+    printCart();
+    
     return cart;
 }
 
 function open_modal(){
 	console.log("Open Modal");
 	printCart();
+}
+
+function numberProducts() {
+    totalProducts = 0;
+    for (let i = 0; i < cart.length; i++) { 
+        totalProducts += cart[i].quantity;
+    }
+    return document.getElementById('count_product').innerHTML = totalProducts;
 }
